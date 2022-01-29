@@ -37,8 +37,8 @@ var (
 
 func main() {
 	app := &cli.App{
-		Name:        "gg",
-		HelpName:    "gg",
+		Name:        "ggcode",
+		HelpName:    "ggcode",
 		Description: "generate golang code for crud",
 		Flags: []cli.Flag{
 			&cli.StringFlag{

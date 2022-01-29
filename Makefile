@@ -1,9 +1,9 @@
 darwin: clean
 	packr2
 	mkdir -p bin
-	GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -mod=vendor -o ./bin/gg main.go
+	GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -mod=vendor -o ./bin/ggcode main.go
 	#./bin/gg --objectName user --objectIdName uid --objectIdType uint64 --module 'github.com/ldnvnbl/gg'
-	./bin/gg --objectName chatThread
+	#./bin/gg --objectName chatThread
 
 fmt:
 	go fmt ./...
