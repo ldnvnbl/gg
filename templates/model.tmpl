@@ -1,0 +1,109 @@
+// ggArgs targetPath: ./service/{{toLower .ObjectName}}/model.go
+package {{toLower .ObjectName}}
+
+import (
+	"context"
+	"errors"
+
+	db2 "github.com/ldnvnbl/base/db"
+	"github.com/ldnvnbl/base/log"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
+
+	"{{.Module}}/proto"
+)
+
+const (
+	{{toLowerCamel .ObjectName}}Table  = "g_{{toSnake .ObjectName}}"
+)
+
+type model struct {
+	db *db2.Selector
+}
+
+func newModel(db *db2.Selector) *model {
+	return &model{
+		db: db,
+	}
+}
+
+
+func (p *model) Add{{toCamel .ObjectName}}(ctx context.Context, {{toLowerCamel .ObjectName}} *proto.{{toCamel .ObjectName}}) (err error) {
+	err = p.db.GetDB(ctx, true).Table({{toLowerCamel .ObjectName}}Table).Create({{toLowerCamel .ObjectName}}).Error
+	if err != nil {
+		log.Error(ctx, "add {{toLowerCamel .ObjectName}} failed", zap.Error(err))
+		return
+	}
+	return
+}
+
+func (p *model) Delete{{toCamel .ObjectName}}ById(ctx context.Context, {{toLowerCamel .ObjectIdName}} {{.ObjectIdType}}) (rowsAffected int64, err error) {
+	ret := p.db.GetDB(ctx, true).
+		Table({{toLowerCamel .ObjectName}}Table).
+		Where("{{toSnake .ObjectIdName}} = ?", {{toLowerCamel .ObjectIdName}}).
+		Delete(nil)
+
+	if err = ret.Error; err != nil {
+		log.Error(ctx, "delete chat thread by id failed", zap.Error(err))
+		return
+	}
+	return ret.RowsAffected, nil
+}
+
+
+func (p *model) update{{toCamel .ObjectName}}SingleField(ctx context.Context, {{toLowerCamel .ObjectIdName}} {{.ObjectIdType}}, fieldName string, newValue interface{}) (rowsAffected int64, err error) {
+	ret := p.db.GetDB(ctx, true).
+		Table({{toLowerCamel .ObjectName}}Table).
+		Where("{{toSnake .ObjectIdName}} = ?", {{toLowerCamel .ObjectIdName}}).
+		Update(fieldName, newValue)
+
+	if err = ret.Error; err != nil {
+		log.Error(ctx, "update {{toLowerCamel .ObjectName}} single field failed", zap.Error(err), zap.String("fieldName", fieldName))
+		return
+	}
+	return ret.RowsAffected, nil
+}
+
+func (p *model) Get{{toCamel .ObjectName}}ById(ctx context.Context, {{toLowerCamel .ObjectIdName}} {{.ObjectIdType}}, isMaster bool) ({{toLowerCamel .ObjectName}} *proto.{{toCamel .ObjectName}}, err error) {
+	{{toLowerCamel .ObjectName}} = &proto.{{toCamel .ObjectName}}{}
+	err = p.db.GetDB(ctx, isMaster).
+		Table({{toLowerCamel .ObjectName}}Table).
+		Where("{{toSnake .ObjectIdName}} = ?", {{toLowerCamel .ObjectIdName}}).
+		First({{toLowerCamel .ObjectName}}).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		log.Error(ctx, "get {{toLowerCamel .ObjectName}} by id failed", zap.Error(err))
+		return
+	}
+	return
+}
+
+func (p *model) Get{{toCamel .ObjectName}}ListByIds(ctx context.Context, {{toLowerCamel .ObjectIdName}}s []{{.ObjectIdType}}, keepOrder bool, isMaster bool) ({{toLowerCamel .ObjectName}}List proto.{{toCamel .ObjectName}}List, err error) {
+	{{toLowerCamel .ObjectName}}List = make(proto.{{toCamel .ObjectName}}List, 0)
+	err = p.db.GetDB(ctx, isMaster).
+		Table({{toLowerCamel .ObjectName}}Table).
+		Where("{{toSnake .ObjectIdName}} in (?)", {{toLowerCamel .ObjectIdName}}s).
+		Find(&{{toLowerCamel .ObjectName}}List).Error
+
+	if err != nil {
+		log.Error(ctx, "get {{toLowerCamel .ObjectName}} list failed", zap.Error(err))
+		return
+	}
+
+    if keepOrder {
+        m := make(map[{{.ObjectIdType}}]*proto.{{toCamel .ObjectName}})
+        for _, _v := range {{toLowerCamel .ObjectName}}List {
+            m[_v.{{toCamel .ObjectIdName}}] = _v
+        }
+        ordered{{toCamel .ObjectName}}List := {{toLowerCamel .ObjectName}}List[:0]
+        for _, _v := range {{toLowerCamel .ObjectName}}List {
+            ordered{{toCamel .ObjectName}}List = append(ordered{{toCamel .ObjectName}}List, m[_v.{{toCamel .ObjectIdName}}])
+        }
+        {{toLowerCamel .ObjectName}}List = ordered{{toCamel .ObjectName}}List
+    }
+    return
+}
+

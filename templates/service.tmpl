@@ -1,0 +1,75 @@
+// ggArgs targetPath: ./service/{{toLower .ObjectName}}/service.go
+package {{toLower .ObjectName}}
+
+import (
+	"context"
+	"time"
+
+	"github.com/go-redis/redis/v8"
+	db2 "github.com/ldnvnbl/base/db"
+	"github.com/ldnvnbl/base/httputil"
+	"github.com/ldnvnbl/base/log"
+	"go.uber.org/zap"
+
+	"{{.Module}}/proto"
+)
+
+type service struct {
+	cache  *cache
+	model  *model
+	kernel *proto.Kernel
+}
+
+func New{{toCamel .ObjectName}}Service(redisCli *redis.Client, db *db2.Selector, kernel *proto.Kernel) proto.I{{toCamel .ObjectName}}Service {
+	return &service{
+		cache:  newCache(redisCli),
+		model:  newModel(db),
+		kernel: kernel,
+	}
+}
+
+func (p *service) Add{{toCamel .ObjectName}}(ctx context.Context, session *proto.Session, {{toLowerCamel .ObjectName}} *proto.{{toCamel .ObjectName}}) (ret{{toCamel .ObjectName}} *proto.{{toCamel .ObjectName}}, err error) {
+	{{toLowerCamel .ObjectName}}.{{toCamel .ObjectIdName}} = p.kernel.GUIDService.{{if eq .ObjectIdType "string"}}GetGUIDString(){{else if eq .ObjectIdType "uint64"}}GetGUID(){{end}}
+    {{toLowerCamel .ObjectName}}.CreatedTime = time.Now().Unix()
+	err = p.model.Add{{toCamel .ObjectName}}(ctx, {{toLowerCamel .ObjectName}})
+	if err != nil {
+		log.Error(ctx, "model.Add{{toCamel .ObjectName}} failed", zap.Error(err))
+		err = httputil.NewInternalServerError(err)
+		return
+	}
+	return {{toLowerCamel .ObjectName}}, nil
+}
+
+func (p *service) Delete{{toCamel .ObjectName}}ById(ctx context.Context, session *proto.Session, {{toLowerCamel .ObjectIdName}} {{.ObjectIdType}}) (err error) {
+	_, err = p.model.Delete{{toCamel .ObjectName}}ById(ctx, {{toLowerCamel .ObjectIdName}})
+	if err != nil {
+		log.Error(ctx, "model.Delete{{toCamel .ObjectName}}ById failed", zap.Error(err))
+		err = httputil.NewInternalServerError(err)
+		return
+	}
+	return
+}
+
+func (p *service) Update{{toCamel .ObjectName}}(ctx context.Context, session *proto.Session, updateRequest *proto.Update{{toCamel .ObjectName}}Request) ({{toLowerCamel .ObjectName}} *proto.{{toCamel .ObjectName}}, err error) {
+    return
+}
+
+func (p *service) Get{{toCamel .ObjectName}}ById(ctx context.Context, session *proto.Session, {{toLowerCamel .ObjectIdName}} {{.ObjectIdType}}) ({{toLowerCamel .ObjectName}} *proto.{{toCamel .ObjectName}}, err error) {
+	{{toLowerCamel .ObjectName}}, err = p.model.Get{{toCamel .ObjectName}}ById(ctx, {{toLowerCamel .ObjectIdName}}, false)
+	if err != nil {
+		log.Error(ctx, "model.Get{{toCamel .ObjectName}}ById failed", zap.Error(err))
+		err = httputil.NewInternalServerError(err)
+		return
+	}
+	return
+}
+
+func (p *service) Get{{toCamel .ObjectName}}ListByIds(ctx context.Context, session *proto.Session, {{toLowerCamel .ObjectIdName}}s []{{.ObjectIdType}}) ({{toLowerCamel .ObjectName}}List proto.{{toCamel .ObjectName}}List, err error) {
+	{{toLowerCamel .ObjectName}}List, err = p.model.Get{{toCamel .ObjectName}}ListByIds(ctx, {{toLowerCamel .ObjectIdName}}s, true, false)
+	if err != nil {
+		log.Error(ctx, "model.Get{{toCamel .ObjectName}}ListByIds failed", zap.Error(err))
+		err = httputil.NewInternalServerError(err)
+		return
+	}
+	return
+}

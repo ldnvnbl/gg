@@ -1,0 +1,17 @@
+// ggArgs targetPath: ./service/{{toLower .ObjectName}}/cache.go
+
+package {{toLower .ObjectName}}
+
+import (
+	"github.com/go-redis/redis/v8"
+)
+
+type cache struct {
+	redisCli *redis.Client
+}
+
+func newCache(redisCli *redis.Client) *cache {
+	return &cache{
+		redisCli: redisCli,
+	}
+}

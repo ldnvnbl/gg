@@ -1,0 +1,7 @@
+bin
+packrd
+.idea
+proto
+service
+vendor
+*-packr.go

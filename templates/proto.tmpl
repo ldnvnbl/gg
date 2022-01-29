@@ -1,0 +1,63 @@
+// ggArgs targetPath: ./proto/{{toSnake .ObjectName}}.go
+package proto
+
+import (
+	"context"
+	"database/sql/driver"
+	"encoding/json"
+
+	"github.com/ldnvnbl/base/utils"
+)
+
+
+type {{toCamel .ObjectName}} struct {
+	{{toCamel .ObjectIdName}}    {{.ObjectIdType}}            `json:"{{toLowerCamel .ObjectIdName}}" gorm:"Column:{{toSnake .ObjectIdName}}"`
+	CreatedTime int64             `json:"createdTime" gorm:"Column:created_time"`
+	Extensions  *{{toCamel .ObjectName}}Extensions `json:"extensions,omitempty" gorm:"Column:extensions"`
+
+	Extra *{{toCamel .ObjectName}}Extra `json:"extra,omitempty" gorm:"-"`
+}
+
+type {{toCamel .ObjectName}}Extensions struct {
+}
+
+func (p *{{toCamel .ObjectName}}Extensions) Scan(value interface{}) error {
+	return utils.UnmarshalValue(value, p)
+}
+
+func (p {{toCamel .ObjectName}}Extensions) Value() (driver.Value, error) {
+	return json.Marshal(p)
+}
+
+func (p {{toCamel .ObjectName}}Extensions) GormDataType() string {
+	return "{{toCamel .ObjectName}}Extra"
+}
+
+type {{toCamel .ObjectName}}Extra struct {
+}
+
+func (p *{{toCamel .ObjectName}}Extra) Scan(value interface{}) error {
+	return utils.UnmarshalValue(value, p)
+}
+
+func (p {{toCamel .ObjectName}}Extra) Value() (driver.Value, error) {
+	return json.Marshal(p)
+}
+
+func (p {{toCamel .ObjectName}}Extra) GormDataType() string {
+	return "{{toCamel .ObjectName}}Extra"
+}
+
+type {{toCamel .ObjectName}}List []*{{toCamel .ObjectName}}
+
+type Update{{toCamel .ObjectName}}Request struct {
+	{{toCamel .ObjectIdName}} string `json:"{{toLowerCamel .ObjectIdName}}"`
+}
+
+type I{{toCamel .ObjectName}}Service interface {
+	Add{{toCamel .ObjectName}}(ctx context.Context, session *Session, {{toLowerCamel .ObjectName}} *{{toCamel .ObjectName}}) (ret{{toCamel .ObjectName}} *{{toCamel .ObjectName}}, err error)
+	Delete{{toCamel .ObjectName}}ById(ctx context.Context, session *Session, {{toLowerCamel .ObjectIdName}} {{.ObjectIdType}}) (err error)
+	Update{{toCamel .ObjectName}}(ctx context.Context, session *Session, req *Update{{toCamel .ObjectName}}Request) ({{toLowerCamel .ObjectName}} *{{toCamel .ObjectName}}, err error)
+	Get{{toCamel .ObjectName}}ById(ctx context.Context, session *Session, {{toLowerCamel .ObjectIdName}} {{.ObjectIdType}}) ({{toLowerCamel .ObjectName}} *{{toCamel .ObjectName}}, err error)
+	Get{{toCamel .ObjectName}}ListByIds(ctx context.Context, session *Session, {{toLowerCamel .ObjectIdName}}s []{{.ObjectIdType}}) ({{toLowerCamel .ObjectName}}List {{toCamel .ObjectName}}List, err error)
+}
