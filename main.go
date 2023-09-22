@@ -3,15 +3,14 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"embed"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
 
-	"github.com/gobuffalo/packr/v2"
 	"github.com/iancoleman/strcase"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
@@ -21,11 +20,19 @@ const (
 	ggArgsPrefix = "// ggArgs"
 )
 
+//go:embed templates/*
+var fs embed.FS
+
 type TemplateVariables struct {
-	ObjectName   string
-	ObjectIdName string
-	ObjectIdType string
-	Module       string
+	ObjectName      string
+	ObjectIdName    string
+	ObjectIdType    string
+	Module          string
+	DBPackage       string
+	LogPackage      string
+	CrudPackage     string
+	UtilsPackage    string
+	HttputilPackage string
 }
 
 var (
@@ -60,6 +67,36 @@ func main() {
 				Name:  "module",
 				Usage: "project module",
 			},
+			&cli.StringFlag{
+				Name:     "db-package",
+				Usage:    "import db pkg",
+				EnvVars:  []string{"DB_PACKAGE"},
+				Required: true,
+			},
+			&cli.StringFlag{
+				Name:     "log-package",
+				Usage:    "import log pkg",
+				EnvVars:  []string{"LOG_PACKAGE"},
+				Required: true,
+			},
+			&cli.StringFlag{
+				Name:     "crud-package",
+				Usage:    "import crud pkg",
+				EnvVars:  []string{"CRUD_PACKAGE"},
+				Required: true,
+			},
+			&cli.StringFlag{
+				Name:     "utils-package",
+				Usage:    "import utils pkg",
+				EnvVars:  []string{"UTILS_PACKAGE"},
+				Required: true,
+			},
+			&cli.StringFlag{
+				Name:     "httputil-package",
+				Usage:    "import httputil pkg",
+				EnvVars:  []string{"HTTPUTIL_PACKAGE"},
+				Required: true,
+			},
 		},
 		Action: run,
 	}
@@ -93,20 +130,28 @@ func run(ctx *cli.Context) (err error) {
 		return fmt.Errorf("invalid objectIdType: %s", objectIdType)
 	}
 
-	tmplVals := TemplateVariables{
-		ObjectName:   objectName,
-		ObjectIdName: objectIdName,
-		ObjectIdType: objectIdType,
-		Module:       module,
+	tmplVars := TemplateVariables{
+		ObjectName:      objectName,
+		ObjectIdName:    objectIdName,
+		ObjectIdType:    objectIdType,
+		Module:          module,
+		DBPackage:       ctx.String("db-package"),
+		LogPackage:      ctx.String("log-package"),
+		CrudPackage:     ctx.String("crud-package"),
+		UtilsPackage:    ctx.String("utils-package"),
+		HttputilPackage: ctx.String("httputil-package"),
 	}
 
-	box := packr.New("templates", "./templates")
-	tmplNameList := box.List()
+	ff, err := fs.ReadDir("templates")
+	if err != nil {
+		log.Errorf("fs.ReadDir failed: %v", err)
+		return
+	}
 
-	for _, tmplName := range tmplNameList {
-		err = genCode(box, tmplName, tmplVals)
+	for _, f := range ff {
+		err = genCode(f.Name(), tmplVars)
 		if err != nil {
-			log.Errorf("gen code with %s failed: %v", tmplName, err)
+			log.Errorf("gen code with %s failed: %v", f.Name(), err)
 			return err
 		}
 	}
@@ -136,13 +181,13 @@ func getModuleFromGoMod() (string, error) {
 	return "", errors.New("can't find module")
 }
 
-func genCode(box *packr.Box, tmplName string, tmplData interface{}) (err error) {
-	s, err := box.FindString(tmplName)
+func genCode(tmplName string, tmplVars interface{}) (err error) {
+	tmplData, err := fs.ReadFile("templates/" + tmplName)
 	if err != nil {
-		log.Errorf("box find %s string failed: %v", tmplName, err)
+		log.Errorf("read tmpl %s failed: %v", tmplName, err)
 		return
 	}
-
+	s := string(tmplData)
 	funcMap := template.FuncMap{
 		"toSnake":      strcase.ToSnake,
 		"toCamel":      strcase.ToCamel,
@@ -151,7 +196,7 @@ func genCode(box *packr.Box, tmplName string, tmplData interface{}) (err error) 
 	}
 	t := template.Must(template.New(tmplName).Funcs(funcMap).Parse(s))
 	codeBuf := bytes.NewBuffer(nil)
-	err = t.Execute(codeBuf, tmplData)
+	err = t.Execute(codeBuf, tmplVars)
 	if err != nil {
 		log.Errorf("tmpl execute failed: %v", err)
 		return
@@ -214,7 +259,7 @@ func writeCodeToFile(path string, code string) (err error) {
 		return
 	}
 
-	err = ioutil.WriteFile(path, []byte(code), 0644)
+	err = os.WriteFile(path, []byte(code), 0644)
 	if err != nil {
 		log.Errorf("write code to %s failed: %v", path, code)
 		return
