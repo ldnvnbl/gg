@@ -11,6 +11,13 @@ import (
 )
 
 
+// Add{{toCamel .ObjectName}}
+// @Tags {{toCamel .ObjectName}}
+// @Produce json
+// @Param {{toCamel .ObjectName}} body proto.{{toCamel .ObjectName}} true "{{toCamel .ObjectName}}"
+// @Success 200 {object} proto.{{toCamel .ObjectName}} "success"
+// @Success 400 {object} httputil.HTTPError "failed"
+// @Router /api/v1/{{toLowerCamel .ObjectName}}s [POST]
 func (p *server) Add{{toCamel .ObjectName}}(c *gin.Context) {
     session := proto.GetSession(c)
     {{toLowerCamel .ObjectName}} := &proto.{{toCamel .ObjectName}}{}
@@ -27,6 +34,13 @@ func (p *server) Add{{toCamel .ObjectName}}(c *gin.Context) {
    	c.JSON(http.StatusOK, {{toLowerCamel .ObjectName}})
 }
 
+// Delete{{toCamel .ObjectName}}ById
+// @Tags {{toCamel .ObjectName}}
+// @Produce json
+// @Param {{toLowerCamel .ObjectIdName}} path string true "{{toLowerCamel .ObjectIdName}}"
+// @Success 200 {object} proto.{{toCamel .ObjectName}} "success"
+// @Success 400 {object} httputil.HTTPError "failed"
+// @Router /api/v1/{{toLowerCamel .ObjectName}}s/:{{toLowerCamel .ObjectIdName}} [DELETE]
 func (p *server) Delete{{toCamel .ObjectName}}ById(c *gin.Context) {
     session := proto.GetSession(c)
     {{toLowerCamel .ObjectIdName}} := c.Param("{{toLowerCamel .ObjectIdName}}")
@@ -38,6 +52,14 @@ func (p *server) Delete{{toCamel .ObjectName}}ById(c *gin.Context) {
    	c.JSON(http.StatusOK, gin.H{})
 }
 
+// Update{{toCamel .ObjectName}}
+// @Tags {{toCamel .ObjectName}}
+// @Produce json
+// @Param {{toLowerCamel .ObjectIdName}} path string true "{{toLowerCamel .ObjectIdName}}"
+// @Param Update{{toCamel .ObjectName}}Request body proto.Update{{toCamel .ObjectName}}Request true "Update{{toCamel .ObjectName}}Request"
+// @Success 200 {object} proto.{{toCamel .ObjectName}} "success"
+// @Success 400 {object} httputil.HTTPError "failed"
+// @Router /api/v1/{{toLowerCamel .ObjectName}}s/:{{toLowerCamel .ObjectIdName}} [POST]
 func (p *server) Update{{toCamel .ObjectName}}(c *gin.Context) {
     session := proto.GetSession(c)
     req := &proto.Update{{toCamel .ObjectName}}Request{}
@@ -54,6 +76,13 @@ func (p *server) Update{{toCamel .ObjectName}}(c *gin.Context) {
    	c.JSON(http.StatusOK, {{toLowerCamel .ObjectName}})
 }
 
+// Get{{toCamel .ObjectName}}ById
+// @Tags {{toCamel .ObjectName}}
+// @Produce json
+// @Param {{toLowerCamel .ObjectIdName}} path string true "{{toLowerCamel .ObjectIdName}}"
+// @Success 200 {object} proto.{{toCamel .ObjectName}} "success"
+// @Success 400 {object} httputil.HTTPError "failed"
+// @Router /api/v1/{{toLowerCamel .ObjectName}}s/:{{toLowerCamel .ObjectIdName}} [GET]
 func (p *server) Get{{toCamel .ObjectName}}ById(c *gin.Context) {
     session := proto.GetSession(c)
     {{toLowerCamel .ObjectIdName}} := c.Param("{{toLowerCamel .ObjectIdName}}")
