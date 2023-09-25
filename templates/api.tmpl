@@ -12,6 +12,7 @@ import (
 
 
 // Add{{toCamel .ObjectName}}
+// @Summary Create {{toCamel .ObjectName}}
 // @Tags {{toCamel .ObjectName}}
 // @Produce json
 // @Param {{toCamel .ObjectName}} body proto.{{toCamel .ObjectName}} true "{{toCamel .ObjectName}}"
@@ -35,6 +36,7 @@ func (p *server) Add{{toCamel .ObjectName}}(c *gin.Context) {
 }
 
 // Delete{{toCamel .ObjectName}}ById
+// @Summary Delete {{toCamel .ObjectName}} By {{toLowerCamel .ObjectIdName}}
 // @Tags {{toCamel .ObjectName}}
 // @Produce json
 // @Param {{toLowerCamel .ObjectIdName}} path string true "{{toLowerCamel .ObjectIdName}}"
@@ -53,6 +55,7 @@ func (p *server) Delete{{toCamel .ObjectName}}ById(c *gin.Context) {
 }
 
 // Update{{toCamel .ObjectName}}
+// @Summary Update {{toCamel .ObjectName}}
 // @Tags {{toCamel .ObjectName}}
 // @Produce json
 // @Param {{toLowerCamel .ObjectIdName}} path string true "{{toLowerCamel .ObjectIdName}}"
@@ -77,6 +80,7 @@ func (p *server) Update{{toCamel .ObjectName}}(c *gin.Context) {
 }
 
 // Get{{toCamel .ObjectName}}ById
+// @Summary Get {{toCamel .ObjectName}} By {{toLowerCamel .ObjectIdName}}
 // @Tags {{toCamel .ObjectName}}
 // @Produce json
 // @Param {{toLowerCamel .ObjectIdName}} path string true "{{toLowerCamel .ObjectIdName}}"
