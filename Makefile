@@ -7,4 +7,4 @@ fmt:
 	goimports -local github.com/ldnvnbl/gg -w `go list -f {{.Dir}} ./...`
 
 clean:
-	rm -rf bin
+	rm -rf bin api proto service
