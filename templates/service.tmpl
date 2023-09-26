@@ -70,5 +70,10 @@ func (p *service) Get{{toCamel .ObjectName}}ById(ctx context.Context, uid string
 		log.Error(ctx, "model.Get {{toCamel .ObjectName}} by pk failed", zap.Error(err))
 		return
 	}
+
+	if {{toLowerCamel .ObjectName}} == nil {
+	    err = httputil.NewBadRequestError(httputil.APICodeNotFound, fmt.Errorf("{{toLowerCamel .ObjectName}} not found"))
+        return
+	}
 	return
 }
