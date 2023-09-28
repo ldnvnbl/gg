@@ -77,3 +77,15 @@ func (p *service) Get{{toCamel .ObjectName}}ById(ctx context.Context, uid string
 	}
 	return
 }
+
+func (p *service) Get{{toCamel .ObjectName}}ListByUid(ctx context.Context, uid string, cursor{{toCamel .ObjectIdName}} {{.ObjectIdType}}, size int) ({{toLowerCamel .ObjectName}}List proto.{{toCamel .ObjectName}}List, last{{toCamel .ObjectIdName}} {{.ObjectIdType}}, err error) {
+    {{toLowerCamel .ObjectName}}List, err = p.{{toLowerCamel .ObjectName}}Model.Get{{toCamel .ObjectName}}ListByUid(ctx, uid, cursor{{toCamel .ObjectIdName}}, size, false)
+    if err != nil {
+        log.Error(ctx, "{{toLowerCamel .ObjectName}}Model.Get{{toCamel .ObjectName}}ListByUid failed", zap.Error(err))
+        return
+    }
+    if len({{toLowerCamel .ObjectName}}List) > 0 {
+        last{{toCamel .ObjectIdName}} = {{toLowerCamel .ObjectName}}List[len({{toLowerCamel .ObjectName}}List)-1].{{toCamel .ObjectIdName}}
+    }
+    return
+}

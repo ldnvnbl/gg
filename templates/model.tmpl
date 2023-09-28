@@ -20,3 +20,7 @@ func new{{toCamel .ObjectName}}Model(db *db2.Selector) *{{toLowerCamel .ObjectNa
     	},
 	}
 }
+
+func (p *{{toLowerCamel .ObjectName}}Model) Get{{toCamel .ObjectName}}ListByUid(ctx context.Context, uid string, cursor{{toCamel .ObjectIdName}} {{.ObjectIdType}}, size int, isMaster bool) ({{toLowerCamel .ObjectName}}List proto.{{toCamel .ObjectName}}List, err error) {
+	return p.GetListByFieldAndCursor(ctx, "uid", uid, cursor{{toCamel .ObjectIdName}}, size, "DESC", isMaster)
+}

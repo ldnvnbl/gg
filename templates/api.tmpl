@@ -97,3 +97,47 @@ func (p *server) Get{{toCamel .ObjectName}}ById(c *gin.Context) {
    	}
    	c.JSON(http.StatusOK, {{toLowerCamel .ObjectName}})
 }
+
+
+type {{toLowerCamel .ObjectName}}ListResp struct {
+	Pagination *httputil.Pagination `json:"pagination"`
+	List       proto.{{toCamel .ObjectName}}List `json:"list"`
+}
+
+// Get{{toCamel .ObjectName}}List
+// @Summary Get {{toCamel .ObjectName}} List
+// @Tags {{toCamel .ObjectName}}
+// @Produce json
+// @Param pageToken query string false "Page Token"
+// @Param size query integer false "Size"
+// @Success 200 {object} {{toLowerCamel .ObjectName}}ListResp "success"
+// @Success 400 {object} httputil.HTTPError "failed"
+// @Router /api/v1/{{toLowerCamel .ObjectName}}s [GET]
+func (p *server) Get{{toCamel .ObjectName}}List(c *gin.Context) {
+    session := proto.GetSession(c)
+    q := struct {
+        httputil.PageQuery
+    }{}
+
+    err := c.BindQuery(&q)
+    if err != nil {
+        httputil.RespondWithBadRequestMessage(c, "bind query {{toLowerCamel .ObjectName}} params failed")
+        return
+    }
+    q.Size = httputil.LimitQuerySize(q.Size)
+
+    pageToken, err := httputil.DecodePageToken(q.PageToken)
+    if err != nil {
+        httputil.RespondWithBadRequestMessage(c, "invalid page token")
+        return
+    }
+    {{toLowerCamel .ObjectName}}List, last{{toCamel .ObjectIdName}}, err := p.Kernel.{{toCamel .ObjectName}}Service.Get{{toCamel .ObjectName}}ListByUid(c, session.Uid, pageToken.GetCursorId(), q.Size)
+   	if err != nil {
+   		httputil.RespondWithError(c, err)
+   		return
+   	}
+   	c.JSON(http.StatusOK, {{toLowerCamel .ObjectName}}ListResp{
+   	    List: {{toLowerCamel .ObjectName}}List,
+   	    Pagination: httputil.NewNextCursorPagination(last{{toCamel .ObjectIdName}}),
+   	})
+}
