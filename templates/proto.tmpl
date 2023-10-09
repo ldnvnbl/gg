@@ -43,5 +43,5 @@ type I{{toCamel .ObjectName}}Service interface {
 	Delete{{toCamel .ObjectName}}ById(ctx context.Context, uid string, {{toLowerCamel .ObjectIdName}} {{.ObjectIdType}}) (err error)
 	Update{{toCamel .ObjectName}}(ctx context.Context, uid string, req *Update{{toCamel .ObjectName}}Request) ({{toLowerCamel .ObjectName}} *{{toCamel .ObjectName}}, err error)
 	Get{{toCamel .ObjectName}}ById(ctx context.Context, uid string, {{toLowerCamel .ObjectIdName}} {{.ObjectIdType}}) ({{toLowerCamel .ObjectName}} *{{toCamel .ObjectName}}, err error)
-	Get{{toCamel .ObjectName}}ListByUid(ctx context.Context, uid string, cursor{{toCamel .ObjectIdName}} {{.ObjectIdType}}, size int) ({{toLowerCamel .ObjectName}}List *{{toCamel .ObjectName}}List, last{{toCamel .ObjectIdName}} {{.ObjectIdType}}, err error)
+	Get{{toCamel .ObjectName}}ListByUid(ctx context.Context, uid string, cursor{{toCamel .ObjectIdName}} {{.ObjectIdType}}, size int) ({{toLowerCamel .ObjectName}}List {{toCamel .ObjectName}}List, last{{toCamel .ObjectIdName}} {{.ObjectIdType}}, err error)
 }
