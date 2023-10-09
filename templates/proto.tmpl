@@ -14,7 +14,7 @@ type {{toCamel .ObjectName}} struct {
 	{{toCamel .ObjectIdName}}    {{.ObjectIdType}}            `json:"{{toLowerCamel .ObjectIdName}}" gorm:"Column:{{toSnake .ObjectIdName}}"`
 	Uid string `json:"uid" gorm:"Column:uid"`
 	CreatedTime int64             `json:"createdTime" gorm:"Column:created_time"`
-	Extra *{{toCamel .ObjectName}}Extra `json:"extra,omitempty" gorm:"-"`
+	Extra *{{toCamel .ObjectName}}Extra `json:"extra,omitempty" gorm:"Column:extra"`
 }
 
 type {{toCamel .ObjectName}}Extra struct {
