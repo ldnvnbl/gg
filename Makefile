@@ -1,3 +1,7 @@
+build: clean
+	mkdir -p bin
+	go build -mod=vendor -o ./bin/ggcode main.go
+
 darwin: clean
 	mkdir -p bin
 	GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -mod=vendor -o ./bin/ggcode main.go
